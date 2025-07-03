@@ -12,10 +12,7 @@ const mazeRouter = require('./routes/maze');
 var app = express();
 app.use(cookieParser());
 const cors = require('cors');
-app.use(cors({
-    origin: 'http://127.0.0.1:5500',
-    credentials: true,
-}));
+app.use(cors());
 
 require('./models/connection');
 
