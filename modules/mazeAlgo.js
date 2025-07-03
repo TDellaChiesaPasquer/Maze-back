@@ -72,8 +72,14 @@ function isSolvable(grid) {
     if (!Array.isArray(grid)) {
         return false;
     }
-    for (let element of grid) {
+    if (grid.length < 3 || grid.length > 50) {
+        return false;
+    }
+    for (const element of grid) {
         if (!Array.isArray(element)) {
+            return false;
+        }
+        if (element.length < 3 || element.length > 50) {
             return false;
         }
     }
@@ -97,4 +103,67 @@ function isSolvable(grid) {
     return false;
 }
 
-module.exports = {isSolvable};
+function isSolvable2(grid) {
+    console.log(grid)
+    if (!Array.isArray(grid)) {
+        return false;
+    }
+    if (grid.length < 3 || grid.length > 50) {
+        return false;
+    }
+    for (const element of grid) {
+        if (!Array.isArray(element)) {
+            return false;
+        }
+        if (element.length < 3 || element.length > 50) {
+            return false;
+        }
+    }
+    const entrance = verifyBasic(grid);
+    if (!entrance) {
+        return false;
+    }
+    const n = grid.length;
+    const m = grid[0].length;
+    const precedent = Array.from(Array(n), () => Array.from(Array(m), () => null));
+    const toVisit = [entrance];
+    precedent[entrance[0]][entrance[1]] = 1;
+    let currentTile;
+    while (toVisit.length > 0) {
+        currentTile = toVisit.shift();
+        const possibleExit = findUnexploredNext(grid, currentTile, precedent, toVisit);
+        if (possibleExit) {
+            return true;
+        }
+    }
+    return false;
+}
+
+function isGrid(value) {
+    const valid = isSolvable(value);
+    if (!valid) {
+        throw new Error('The maze is invalid');
+    }
+    return true;
+}
+
+const paramList = ['hideWalls', 'hidePath', 'hideExit'];
+
+function paramsValid(value) {
+    if (!(value instanceof Object)) {
+        throw new Error('Parameters invalid');
+    }
+    const keys = Object.keys(value);
+    if (keys.length !== 3) {
+        throw new Error('Parameters invalid');
+    }
+    if (keys.some(element => !paramList.some(e => e === element))) {
+        throw new Error('Parameters invalid');
+    }
+    if (keys.some(element => typeof value[element] !== 'boolean')) {
+        throw new Error('Parameters invalid');
+    }
+    return true;
+}
+
+module.exports = {isSolvable, isGrid, paramsValid, isSolvable2};

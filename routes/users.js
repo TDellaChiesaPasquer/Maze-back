@@ -14,7 +14,7 @@ router.post('/signup',
     try {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            return res.status(400).json({errors: errors.array()});
+            return res.status(400).json({result: false, error: errors.array()});
         }
         let possibleUser = await User.findOne({email: req.body.email});
         if (possibleUser) {
@@ -24,10 +24,13 @@ router.post('/signup',
         if (possibleUser) {
             return res.json({result: false, error: 'The username is already taken'});
         }
+        const salt = await bcrypt.genSalt(saltRounds);
+        const secPass = await bcrypt.hash(req.body.password, salt);
         const newUser = new User({
             email: req.body.email,
-            password: req.body.password,
-            username: req.body.username
+            password: secPass,
+            username: req.body.username,
+            mazeList: []
         })
         await newUser.save();
         res.json({result: true});
@@ -38,27 +41,44 @@ router.post('/signup',
 })
 
 router.post('/signin',
-    body('password').isString().escape().isLength({min: 8, max: 32}),
-    body('username').isString().escape().isLength({min: 3, max: 20}),
+    body('password').isString().escape().isLength({max: 32}),
+    body('username').isString().escape().isLength({max: 20}),
     async (req, res, next) => {
     try {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            return res.status(400).json({errors: errors.array()});
+            return res.status(400).json({error: errors.array()});
         }
-        const possibleUser = await User.findOne({username: req.body.username, password: req.body.password});
+        const possibleUser = await User.findOne({username: req.body.username}).select('password');
         if (!possibleUser) {
             return res.json({result: false, error: 'The username or the password is wrong'});
         }
+        const passwordCompare = await bcrypt.compare(req.body.password, possibleUser.password);
+        if (!passwordCompare) {
+            return res.json({result: false, error: 'The username or the password is wrong'});
+        }
         const token = generateAccessToken(req.body.username);
-        res.json({result: true, token});
+        return res.json({result: true, token})
     } catch (error) {
         console.log(error);
-        return res.status(500).send('Erreur du serveur');
+        return res.status(500).json('Erreur du serveur');
     }})
 
 router.get('/test', authenticateToken, (req, res)=> {
     res.json('test');
+})
+
+router.get('/info', authenticateToken, async (req, res) => {
+    try {
+        const data = await User.findOne({username: req.username});
+        if (!data) {
+            return res.status(500).json({result: false, error: 'Erreur du serveur'});
+        }
+        return res.json({result: true, user: data})
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({result: false, error: 'Erreur du serveur'});
+    }
 })
 
 module.exports = router;

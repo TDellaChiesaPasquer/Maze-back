@@ -1,11 +1,11 @@
 const mongoose = require('mongoose');
-const {isSolvable} = require('../modules/mazeAlgo');
+const {isSolvable2} = require('../modules/mazeAlgo');
 
 const mazeSchema = mongoose.Schema({
     grid: {
         type: [[String]],
         validate: {
-            validator: isSolvable,
+            validator: isSolvable2,
             message: 'The maze is invalid'
         },
         required: [true, 'Please enter a maze']

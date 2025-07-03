@@ -24,7 +24,7 @@ const userSchema = mongoose.Schema({
         required: [true, 'Please enter a username'],
         unique: true,
     },
-    mazeList: [{type: mongoose.Schema.Types.ObjectId, ref: 'mazes'}]
+    mazeList: {type: [{type: mongoose.Schema.Types.ObjectId, ref: 'mazes'}], default: []}
 })
 
 const User = mongoose.model('users', userSchema);
