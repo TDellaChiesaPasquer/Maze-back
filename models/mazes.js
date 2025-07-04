@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const {isSolvable2} = require('../modules/mazeAlgo');
-require('./models/connection');
+require('./connection');
 
 const mazeSchema = mongoose.Schema({
     grid: {
