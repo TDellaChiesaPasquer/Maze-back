@@ -107,7 +107,7 @@ router.get('/:id',
                     }
                 }
             ])
-            return res.json(Boolean(maze) ? {result: true, maze} : {result: false});
+            return res.json(Boolean(maze) ? {result: true, maze: maze[0]} : {result: false});
         } catch (error) {
             console.log(error)
             return res.status(500).json({result: false, error: 'Erreur du serveur'});
