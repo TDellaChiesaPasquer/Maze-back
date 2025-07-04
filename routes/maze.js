@@ -1,11 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
-const {body, validationResult} = require('express-validator');
+const {body, param, validationResult} = require('express-validator');
 const {authenticateToken} = require('../modules/jwt');
 const {isGrid, paramsValid} = require('../modules/mazeAlgo');
 const Maze = require('../models/mazes');
 const User = require('../models/users');
+const mongoose = require('mongoose');
 
 router.post('/', authenticateToken,
     body('grid').custom(isGrid),
@@ -68,5 +69,50 @@ router.get('/random', async (req, res, next) => {
         return res.status(500).json({result: false, error: 'Erreur du serveur'});
     }
 })
+
+router.get('/:id', 
+    param('id').isString().escape().isLength({max: 50}),
+    async (req, res, next) => {
+        try {
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                return res.status(400).json({error: errors.array()});
+            }
+            const maze = await Maze.aggregate([
+                {
+                    $match: {_id: new mongoose.Types.ObjectId(req.params.id)}
+                },
+                {
+                    $lookup: {
+                        from: "users",
+                        localField: "creator",
+                        foreignField: "_id",
+                        as: "creatorInfo"
+                    }
+                },
+                {
+                    $addFields: {
+                        'creatorUsernameArray': '$creatorInfo.username'
+                    }
+                },
+                {
+                    $addFields: {
+                        'creatorUsername': {$arrayElemAt: ['$creatorUsernameArray', 0]}
+                    }
+                },
+                {
+                    $project: {
+                        creatorInfo: 0,
+                        creatorUsernameArray: 0
+                    }
+                }
+            ])
+            return res.json(Boolean(maze) ? {result: true, maze} : {result: false});
+        } catch (error) {
+            console.log(error)
+            return res.status(500).json({result: false, error: 'Erreur du serveur'});
+        }
+    }
+)
 
 module.exports = router;
