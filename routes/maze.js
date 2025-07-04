@@ -34,7 +34,33 @@ router.post('/', authenticateToken,
 router.get('/random', async (req, res, next) => {
     try {
         const mazeList = await Maze.aggregate([
-            {$sample: {size: 10}}
+            {
+                $sample: {size: 10}
+            },
+            {
+                $lookup: {
+                    from: "users",
+                    localField: "creator",
+                    foreignField: "_id",
+                    as: "creatorInfo"
+                }
+            },
+            {
+                $addFields: {
+                    'creatorUsernameArray': '$creatorInfo.username'
+                }
+            },
+            {
+                $addFields: {
+                    'creatorUsername': {$arrayElemAt: ['$creatorUsernameArray', 0]}
+                }
+            },
+            {
+                $project: {
+                    creatorInfo: 0,
+                    creatorUsernameArray: 0
+                }
+            }
         ]);
         res.json({result: true, mazeList});
     } catch (error) {
