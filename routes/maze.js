@@ -22,9 +22,9 @@ router.post('/', authenticateToken,
         }
         const {hideWalls, hidePath, hideExit} = req.body.params;
         const newMaze = new Maze({grid: req.body.grid, hideWalls, hidePath, hideExit, creator: user._id});
-        await newMaze.save();
+        const test = await newMaze.save();
         console.log('test')
-        res.json({result: true});
+        res.json({result: true, data: test});
     } catch (error) {
         console.log(error)
         return res.status(500).json({result: false, error: 'Erreur du serveur'});
