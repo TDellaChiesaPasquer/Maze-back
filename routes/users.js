@@ -50,7 +50,7 @@ router.post('/signin',
             return res.status(400).json({error: errors.array()});
         }
         console.log(req.body)
-        const possibleUser = await User.findOne({username: req.body.username});
+        const possibleUser = await User.findOne({username: req.body.username}).select('password');
         if (!possibleUser) {
             return res.json({result: false, error: 'The username or the password is wrong'});
         }
