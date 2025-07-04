@@ -31,4 +31,16 @@ router.post('/', authenticateToken,
     }
 })
 
+router.get('/random', async (req, res, next) => {
+    try {
+        const mazeList = await Maze.aggregate([
+            {$sample: {size: 10}}
+        ]);
+        res.json({result: true, mazeList});
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({result: false, error: 'Erreur du serveur'});
+    }
+})
+
 module.exports = router;
