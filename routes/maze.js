@@ -32,9 +32,27 @@ router.post('/', authenticateToken,
     }
 })
 
-router.get('/random', async (req, res, next) => {
+function isMazeList(data) {
+    if (!Array.isArray(data)) {
+        return false;
+    }
+    return !data.some(element => typeof element !== 'string' || !mongoose.Types.ObjectId.isValid(element));
+}
+
+router.post('/random',
+    body('mazeList').custom(isMazeList),
+    async (req, res, next) => {
     try {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({error: errors.array()});
+        }
         const mazeList = await Maze.aggregate([
+            {
+                $match: {
+                    _id: {$nin: req.body.mazeList.map(element => new mongoose.Types.ObjectId(element))}
+                }
+            },
             {
                 $sample: {size: 10}
             },
