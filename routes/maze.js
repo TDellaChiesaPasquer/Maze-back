@@ -25,7 +25,7 @@ router.post('/', authenticateToken,
         const {hideWalls, hidePath, hideExit} = req.body.params;
         const newMaze = new Maze({grid: req.body.grid, hideWalls, hidePath, hideExit, creator: user._id});
         const test = await newMaze.save();
-        console.log(test._id, typeof test._id);
+        console.log(test._id, test._id.toString());
         res.json({result: true, data: test});
     } catch (error) {
         console.log(error)
