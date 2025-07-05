@@ -104,7 +104,6 @@ function isSolvable(grid) {
 }
 
 function isSolvable2(grid) {
-    console.log(grid)
     if (!Array.isArray(grid)) {
         return false;
     }
