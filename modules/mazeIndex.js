@@ -15,7 +15,6 @@ async function getRandomId(num, alreadyList) { //Returns num different idCustoms
     alreadyList = alreadyList.sort();
     const randomList = getRandomNums(n, num);
     getFirstWithoutSecond(idList, alreadyList);
-    console.log(idList, randomList, alreadyList)
     return randomList.map(element => idList[element]);
 }
 
@@ -43,7 +42,7 @@ function findFast(m, numberList, a, b) {
         return a;
     }
     const c = Math.floor((b - a) / 2) + a;
-    return numberList[c] <= m ? findFast(m, numberList, c, b) : insertFast(m, numberList, a, c);
+    return numberList[c] <= m ? findFast(m, numberList, c, b) : findFast(m, numberList, a, c);
 }
 
 function getRandomNums(n, m) {//Return m different random integer between 0 and n-1
