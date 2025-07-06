@@ -4,6 +4,7 @@ const bcrypt = require('bcrypt');
 const {body, param, validationResult} = require('express-validator');
 const {authenticateToken} = require('../modules/jwt');
 const {isGrid, paramsValid} = require('../modules/mazeAlgo');
+const {getNextMaxId} = require('../modules/mazeIndex');
 const Maze = require('../models/mazes');
 const User = require('../models/users');
 const mongoose = require('mongoose');
@@ -23,7 +24,7 @@ router.post('/', authenticateToken,
             return res.json({result: false, error: 'You already have the maximum number of mazes registered'})
         }
         const {hideWalls, hidePath, hideExit} = req.body.params;
-        const newMaze = new Maze({grid: req.body.grid, hideWalls, hidePath, hideExit, creator: user._id});
+        const newMaze = new Maze({grid: req.body.grid, hideWalls, hidePath, hideExit, creator: user._id, idCustom: getNextMaxId()[0]});
         const test = await newMaze.save();
         console.log(test._id, test._id.toString());
         res.json({result: true, data: test});
@@ -89,6 +90,11 @@ router.post('/random',
     }
 })
 
+
+router.get('/test', async (req, res) => {
+    res.json({test: await getNextMaxId()})
+})
+
 router.get('/:id', 
     param('id').isString().escape().isLength({max: 50}),
     async (req, res, next) => {
@@ -133,5 +139,6 @@ router.get('/:id',
         }
     }
 )
+
 
 module.exports = router;

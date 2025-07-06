@@ -11,6 +11,11 @@ const mazeSchema = mongoose.Schema({
         },
         required: [true, 'Please enter a maze']
     },
+    idCustom: {
+        type: Number,
+        required: true,
+        index: true
+    },
     hideWalls: {
         type: Boolean,
         default: false
