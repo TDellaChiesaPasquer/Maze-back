@@ -20,7 +20,7 @@ router.post('/', authenticateToken,
         }
         const user = await User.findOne({username: req.username})
         console.log(user.mazeList);
-        if ((user.mazeList !== undefined) && user.mazeList.length >= 10) {
+        if ((user.mazeList !== undefined) && user.mazeList.length >= 50) {
             return res.json({result: false, error: 'You already have the maximum number of mazes registered'})
         }
         const {hideWalls, hidePath, hideExit} = req.body.params;
@@ -39,7 +39,6 @@ function isMazeList(data) {
     if (!Array.isArray(data)) {
         return false;
     }
-    console.log(data)
     return !data.some(element => typeof element !== 'number');
 }
 
@@ -51,7 +50,7 @@ router.post('/random',
         if (!errors.isEmpty()) {
             return res.status(400).json({error: errors.array()});
         }
-        const mazeIdList = await getRandomId(50, req.body.mazeList);
+        const mazeIdList = await getRandomId(10, req.body.mazeList);
         const mazeList = await Maze.aggregate([
             {
                 $match: {
