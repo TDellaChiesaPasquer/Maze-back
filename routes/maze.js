@@ -18,8 +18,7 @@ router.post('/', authenticateToken,
         if (!errors.isEmpty()) {
             return res.status(400).json({error: errors.array()});
         }
-        const user = await User.findOne({username: req.username})
-        console.log(user.mazeList);
+        const user = await User.findOne({username: req.username});
         if ((user.mazeList !== undefined) && user.mazeList.length >= 50) {
             return res.json({result: false, error: 'You already have the maximum number of mazes registered'})
         }

@@ -4,7 +4,6 @@ async function getNextMaxId() {
     const data = await Maze.find().select('idCustom');
     idList = data.map(element => element.idCustom);
     idList.sort((a,b) => a - b);
-    console.log(idList);
     return [idList.reduce((acc, cur) => acc === cur ? acc + 1 : acc, 1), idList[idList.length - 1]]
 }
 
@@ -16,12 +15,12 @@ async function getRandomId(num, alreadyList) { //Returns num different idCustoms
     alreadyList = alreadyList.sort();
     const randomList = getRandomNums(n, num);
     getFirstWithoutSecond(idList, alreadyList);
+    console.log(idList, randomList, alreadyList)
     return randomList.map(element => idList[element]);
 }
 
 function getFirstWithoutSecond(array1, array2) {//Assuming array1 is sorted, return a new array with the values of array1 - those of array2
     for (const element of array2) {
-        console.log(element, array1, array2)
         array1.splice(findFast(element, array1, 0, array1.length), 1);
     }
 }
