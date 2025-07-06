@@ -50,7 +50,7 @@ router.post('/random',
         if (!errors.isEmpty()) {
             return res.status(400).json({error: errors.array()});
         }
-        const mazeIdList = await getRandomId(10, req.body.mazeList);
+        const mazeIdList = await getRandomId(50, req.body.mazeList);
         const mazeList = await Maze.aggregate([
             {
                 $match: {
