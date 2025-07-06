@@ -24,7 +24,9 @@ router.post('/', authenticateToken,
             return res.json({result: false, error: 'You already have the maximum number of mazes registered'})
         }
         const {hideWalls, hidePath, hideExit} = req.body.params;
-        const newMaze = new Maze({grid: req.body.grid, hideWalls, hidePath, hideExit, creator: user._id, idCustom: await getNextMaxId()[0]});
+        const idCustom = await getNextMaxId()[0]
+        console.log(idCustom);
+        const newMaze = new Maze({grid: req.body.grid, hideWalls, hidePath, hideExit, creator: user._id, idCustom});
         const test = await newMaze.save();
         await User.findByIdAndUpdate(user._id, {$push: {mazeList: test._id}})
         res.json({result: true, data: test});
