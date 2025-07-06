@@ -39,6 +39,7 @@ function isMazeList(data) {
     if (!Array.isArray(data)) {
         return false;
     }
+    console.log(data)
     return !data.some(element => typeof element !== 'number');
 }
 
