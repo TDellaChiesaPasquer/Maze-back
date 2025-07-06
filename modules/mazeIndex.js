@@ -10,7 +10,7 @@ async function getNextMaxId() {
 async function getRandomId(num, alreadyList) { //Returns num different idCustoms not in the alreadyList, assuming all alreadyList ids are real
     const data = await Maze.find().select('idCustom');
     idList = data.map(element => element.idCustom);
-    idList.sort();
+    idList.sort((a,b) => a - b);
     const n = idList.length - alreadyList.length;
     alreadyList = alreadyList.sort();
     const randomList = getRandomNums(n, num);
