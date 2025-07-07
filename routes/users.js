@@ -71,7 +71,7 @@ router.get('/test', authenticateToken, (req, res)=> {
 
 router.get('/info', authenticateToken, async (req, res) => {
     try {
-        const data = await User.findOne({username: req.username});
+        const data = await User.findOne({username: req.username}).populate('mazeList');
         if (!data) {
             return res.status(500).json({result: false, error: 'Erreur du serveur'});
         }
