@@ -33,7 +33,8 @@ router.post('/signup',
             mazeList: []
         })
         await newUser.save();
-        res.json({result: true});
+        const token = generateAccessToken(req.body.username);
+        return res.json({result: true, token});
     } catch (error) {
         console.log(error)
         return res.status(500).send('Erreur du serveur');
