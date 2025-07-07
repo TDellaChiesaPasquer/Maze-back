@@ -83,7 +83,7 @@ router.post('/random',
         ]);
         res.json({result: true, mazeList});
     } catch (error) {
-        console.log(error)
+        console.log(error);
         return res.status(500).json({result: false, error: 'Erreur du serveur'});
     }
 })

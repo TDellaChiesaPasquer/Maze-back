@@ -7,11 +7,11 @@ function generateAccessToken(username) {
 function authenticateToken(req, res, next) {
     const token = req.headers['authorization'];
     if (token == null) {
-        return res.status(401).json({result: false, error: 'No token'});
+        return res.status(401).json({result: false, error: 'Please login.'});
     }
     jwt.verify(token, process.env.TOKEN_SECRET, (err, decoded)=> {
         if (err) {
-            return res.status(403).json({result: false, error: 'Token invalid'});
+            return res.status(403).json({result: false, error: 'Your sessions is invalid. Please login again.'});
         }
         req.username = decoded.username;
         next();
