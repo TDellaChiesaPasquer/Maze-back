@@ -187,5 +187,32 @@ router.get('/:id',
     }
 )
 
+router.delete('/custom/:id',
+    authenticateToken,
+    param('id').isString().custom(isNumber),
+    async (req, res, next) => {
+        try{
+            const errors = validationResult(req);
+            if (!errors.isEmpty()) {
+                return res.status(400).json({error: errors.array()});
+            }
+            const possibleMaze = await Maze.findOne({idCustom: Number(req.params.id)}).populate('creator');
+            if (!possibleMaze) {
+                return res.json({result: false, error: "The maze doesn't exist."})
+            }
+            if (possibleMaze.creator.username !== req.username) {
+                await User.findOneAndUpdate({username: req.username}, {$pull: {mazeList : possibleMaze._id}});
+                return res.json({result: false, error: "The maze is not yours."})
+            }
+            await User.findOneAndUpdate({username: req.username}, {$pull: {mazeList : possibleMaze._id}});
+            await Maze.findByIdAndDelete(possibleMaze._id);
+            return res.json({result: true});
+        } catch (error) {
+            console.log(error)
+            return res.status(500).json({result: false, error: 'Erreur du serveur'});
+        }
+    }
+)
+
 
 module.exports = router;
