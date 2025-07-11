@@ -1,4 +1,4 @@
-##### Maze Project Back End
+# Maze Project Back End
 
 Express back end to go wit hthe maze project website.
 
