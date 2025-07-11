@@ -9,17 +9,19 @@ const Maze = require('../models/mazes');
 const User = require('../models/users');
 const mongoose = require('mongoose');
 
-router.post('/', authenticateToken,
+//Manages the routes related to maze posting and getting (excluding the collection)
+
+router.post('/', authenticateToken,     //The route to post a maze
     body('grid').custom(isGrid),
     body('params').custom(paramsValid),
     async (req, res, next) => {
     try {
         const errors = validationResult(req);
-        if (!errors.isEmpty()) {
+        if (!errors.isEmpty()) {        //Verifies the given variables are good
             return res.status(400).json({error: errors.array()});
         }
         const user = await User.findOne({username: req.username});
-        if ((user.mazeList !== undefined) && user.mazeList.length >= 50) {
+        if ((user.mazeList !== undefined) && user.mazeList.length >= 50) {  //Verify the user doesn't have already too many mazes
             return res.json({result: false, error: 'You already have the maximum number of mazes registered'})
         }
         const {hideWalls, hidePath, hideExit} = req.body.params;
@@ -34,14 +36,14 @@ router.post('/', authenticateToken,
     }
 })
 
-function isMazeList(data) {
+function isMazeList(data) {         //Verify the arguement is an array of numbers
     if (!Array.isArray(data)) {
         return false;
     }
     return !data.some(element => typeof element !== 'number');
 }
 
-router.post('/random',
+router.post('/random',      //The route to get random mazes, excluding those given in the body
     body('mazeList').custom(isMazeList),
     async (req, res, next) => {
     try {
@@ -50,7 +52,7 @@ router.post('/random',
             return res.status(400).json({error: errors.array()});
         }
         const mazeIdList = await getRandomId(10, req.body.mazeList);
-        const mazeList = await Maze.aggregate([
+        const mazeList = await Maze.aggregate([     //Gets the mazes, populating them only with the usernames of the creators
             {
                 $match: {
                     idCustom: {$in: mazeIdList}
@@ -88,16 +90,11 @@ router.post('/random',
     }
 })
 
-
-router.get('/test', async (req, res) => {
-    res.json({test: await getNextMaxId()})
-})
-
-function isNumber(value) {
+function isNumber(value) {      //Verify the argument is a number
     return Number(value) !== NaN;
 }
 
-router.get('/custom/:id', 
+router.get('/custom/:id',       //The route to get a maze using its idCustom
     param('id').isString().custom(isNumber),
     async (req, res, next) => {
         try {
@@ -105,7 +102,7 @@ router.get('/custom/:id',
             if (!errors.isEmpty()) {
                 return res.status(400).json({error: errors.array()});
             }
-            const maze = await Maze.aggregate([
+            const maze = await Maze.aggregate([     //Gets the maze, populating it only with the username of the creator
                 {
                     $match: {idCustom: Number(req.params.id)}
                 },
@@ -142,7 +139,7 @@ router.get('/custom/:id',
     }
 )
 
-router.get('/:id', 
+router.get('/:id',      //The route to get a maze using its mongodb id
     param('id').isString().escape().isLength({max: 50}),
     async (req, res, next) => {
         try {
@@ -150,7 +147,7 @@ router.get('/:id',
             if (!errors.isEmpty()) {
                 return res.status(400).json({error: errors.array()});
             }
-            const maze = await Maze.aggregate([
+            const maze = await Maze.aggregate([  //Gets the maze, populating it only with the username of the creator
                 {
                     $match: {_id: new mongoose.Types.ObjectId(req.params.id)}
                 },
@@ -187,7 +184,7 @@ router.get('/:id',
     }
 )
 
-router.delete('/custom/:id',
+router.delete('/custom/:id',        //The route to delete a maze using its idCustom
     authenticateToken,
     param('id').isString().custom(isNumber),
     async (req, res, next) => {
@@ -196,16 +193,17 @@ router.delete('/custom/:id',
             if (!errors.isEmpty()) {
                 return res.status(400).json({error: errors.array()});
             }
-            const possibleMaze = await Maze.findOne({idCustom: Number(req.params.id)}).populate('creator');
+            const possibleMaze = await Maze.findOne({idCustom: Number(req.params.id)}).populate('creator');     //Verify that the maze exists
             if (!possibleMaze) {
+                await User.findOneAndUpdate({username: req.username}, {$pull: {mazeList : possibleMaze._id}}); //Gets the id out of the user mazeList, in the case there was a mistake
                 return res.json({result: false, error: "The maze doesn't exist."})
             }
-            if (possibleMaze.creator.username !== req.username) {
-                await User.findOneAndUpdate({username: req.username}, {$pull: {mazeList : possibleMaze._id}});
+            if (possibleMaze.creator.username !== req.username) {       //Verify that the user is the creator of the maze
+                await User.findOneAndUpdate({username: req.username}, {$pull: {mazeList : possibleMaze._id}}); //Gets the id out of the user mazeList, in the case there was a mistake
                 return res.json({result: false, error: "The maze is not yours."})
             }
-            await User.findOneAndUpdate({username: req.username}, {$pull: {mazeList : possibleMaze._id}});
-            await Maze.findByIdAndDelete(possibleMaze._id);
+            await User.findOneAndUpdate({username: req.username}, {$pull: {mazeList : possibleMaze._id}}); //Gets the id out of the user mazeList
+            await Maze.findByIdAndDelete(possibleMaze._id); //Deletes the maze
             return res.json({result: true});
         } catch (error) {
             console.log(error)
